@@ -1,5 +1,12 @@
 [
   {
+    "id": "today123456789",
+    "date": "2025-06-15T12:35:40.668Z",
+    "cloudProviderId": "98a2779a040f9",
+    "scanSize": 5000,
+    "scanPrivateKey": "today123456"
+  },
+  {
     "id": "e867669d787e9",
     "date": "2024-05-19T14:35:40.668Z",
     "cloudProviderId": "98a2779a040f9",

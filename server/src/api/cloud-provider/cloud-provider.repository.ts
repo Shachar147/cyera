@@ -3,7 +3,7 @@
 */
 
 import cloudProvidersJson from '../../db/cloud-providers.json';
-import { CloudProvider } from './types';
+import { CloudProvider } from './cloud-provider.types';
 
 const cloudProvidersData: CloudProvider[] = cloudProvidersJson;
 

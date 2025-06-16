@@ -1,8 +1,8 @@
 import { ScanRepository } from './scan.repository';
-import { Scan, ScanFilters, DateRange } from './scan.types';
+import { Scan, FindAllParams } from './scan.types';
 
 export class ScanService {
-  private static getDateRangeForYear(year: number): DateRange {
+  private static getDateRangeForYear(year: number): { startDate: Date; endDate: Date } {
     const currentYear = new Date().getFullYear();
     const startDate = new Date(year, 0, 1); // January 1st
 
@@ -20,10 +20,31 @@ export class ScanService {
     return { startDate, endDate };
   }
 
-  static async getScans(filters?: ScanFilters): Promise<Scan[]> {
-    const { year, cloudProviderId } = filters || {};
-    const dateRange = year ? this.getDateRangeForYear(year) : undefined;
+  static async getScans(year?: number, cloudProviderId?: string): Promise<Scan[]> {
+    const params: FindAllParams = {
+      filterCallback: (scan: Scan) => {
+        // If no filters are provided, return all scans
+        if (!year && !cloudProviderId) {
+          return true;
+        }
 
-    return ScanRepository.findAll(dateRange, cloudProviderId);
+        // Apply year filter if provided
+        if (year) {
+          const { startDate, endDate } = this.getDateRangeForYear(year);
+          if (scan.date < startDate || scan.date > endDate) {
+            return false;
+          }
+        }
+
+        // Apply cloudProviderId filter if provided
+        if (cloudProviderId && scan.cloudProviderId !== cloudProviderId) {
+          return false;
+        }
+
+        return true;
+      }
+    };
+
+    return ScanRepository.findAll(params);
   }
 } 

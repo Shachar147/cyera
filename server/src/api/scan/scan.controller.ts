@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ScanService } from './scan.service';
-import { ScanQueryParams } from './scan.types';
+import {ScanQueryParams} from "./scan.types";
 
 export class ScanController {
   static async getScans(req: Request<{}, {}, {}, ScanQueryParams>, res: Response) {
@@ -9,7 +9,7 @@ export class ScanController {
       const year = req.query.year ? Number(req.query.year) : currentYear;
       const cloudProviderId = req.query.cloudProviderId;
 
-      const scans = await ScanService.getScans({ year, cloudProviderId });
+      const scans = await ScanService.getScans(year, cloudProviderId);
       return res.status(200).json(scans);
     } catch (error) {
       console.error('Error fetching scans:', error);
