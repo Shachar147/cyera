@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import './styles.css';
 import { Heatmap } from './components/heatmap/heatmap';
-import { YearPicker } from './components/YearPicker';
-import { CloudPrivderSelect } from './components/CloudPrivderSelect';
+import { CloudProviderSelect } from './components/cloud-provider-select/cloud-provider-select';
 import { useCloudProviders } from './hooks';
+import {YearPicker} from "./components/year-picker/year-picker";
 
 export default function App() {
   const cloudProviders = useCloudProviders();
@@ -18,7 +18,7 @@ export default function App() {
           value={selectedYear}
           onChange={setSelectedYear}
         />
-        <CloudPrivderSelect
+        <CloudProviderSelect
           options={cloudProviders?.map(cp => ({ displayName: cp.name, value: cp.id })) || []}
           onChange={setSelectedCloudProviderIds}
           selectedOptions={selectedCloudProviderIds}

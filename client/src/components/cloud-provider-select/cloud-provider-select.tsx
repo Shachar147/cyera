@@ -26,7 +26,7 @@ interface SelectProps {
   selectedOptions?: string[];
 }
 
-export const CloudPrivderSelect = ({
+export const CloudProviderSelect = ({
   options = [],
   onChange,
   selectedOptions = [],
