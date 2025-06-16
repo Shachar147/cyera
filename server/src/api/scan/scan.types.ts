@@ -16,7 +16,7 @@ export interface Scan {
  */
 export interface ScanFilters {
   year?: number;
-  cloudProviderIds?: string[];
+  cids?: string[];
 }
 
 /**
@@ -34,5 +34,5 @@ export interface DateRange {
  */
 export interface ScanQueryParams {
   year?: string;
-  cloudProviderIds?: string[];
+  cids?: string[];
 }

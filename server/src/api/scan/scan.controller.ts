@@ -7,13 +7,13 @@ export class ScanController {
     try {
       const currentYear = new Date().getFullYear();
       const year = req.query.year ? Number(req.query.year) : currentYear;
-      const cloudProviderIds = Array.isArray(req.query.cloudProviderIds)
-        ? req.query.cloudProviderIds
-        : req.query.cloudProviderIds
-        ? [req.query.cloudProviderIds]
+      const cids = Array.isArray(req.query.cids)
+        ? req.query.cids
+        : req.query.cids
+        ? [req.query.cids]
         : undefined;
 
-      const scans = await ScanService.getScans(year, cloudProviderIds);
+      const scans = await ScanService.getScans(year, cids);
       return res.status(200).json(scans);
     } catch (error) {
       console.error('Error fetching scans:', error);
@@ -25,13 +25,13 @@ export class ScanController {
     try {
       const currentYear = new Date().getFullYear();
       const year = req.query.year ? Number(req.query.year) : currentYear;
-      const cloudProviderIds = Array.isArray(req.query.cloudProviderIds)
-        ? req.query.cloudProviderIds
-        : req.query.cloudProviderIds
-        ? [req.query.cloudProviderIds]
+      const cids = Array.isArray(req.query.cids)
+        ? req.query.cids
+        : req.query.cids
+        ? [req.query.cids]
         : undefined;
 
-      const dailyCounts = await ScanService.getDailyScanCounts(year, cloudProviderIds);
+      const dailyCounts = await ScanService.getDailyScanCounts(year, cids);
       return res.status(200).json(dailyCounts);
     } catch (error) {
       console.error('Error fetching daily scan counts:', error);
