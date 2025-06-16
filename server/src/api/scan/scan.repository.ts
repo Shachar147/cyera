@@ -3,42 +3,25 @@
 */
 
 import scansJson from '../../db/scans.json';
-import { FindAllParams, Scan } from './types';
-
-const scansData: Scan[] = scansJson.map(
-  ({
-    date,
-    ...rest
-  }: {
-    id: string;
-    date: string;
-    cloudProviderId: string;
-    scanSize: number;
-    scanPrivateKey: string;
-  }) => ({
-    ...rest,
-    date: new Date(date),
-  })
-);
+import { Scan, DateRange } from './scan.types';
 
 export class ScanRepository {
-  /**
-   * Find all the scans
-   * @param params
-   * @param params.filterCallback filter all the scans that filterCallback returns true on them
-   * @returns Scan[]
-   */
-  static findAll(params?: FindAllParams): Promise<Scan[]> {
-    const filterCallback = params?.filterCallback;
+  private static scans: Scan[] = scansJson;
 
-    const filteredScans = !filterCallback
-      ? scansData
-      : scansData.filter(filterCallback);
+  static findAll(dateRange?: DateRange, cloudProviderId?: string): Promise<Scan[]> {
+    let filteredScans = this.scans;
 
-    return new Promise((res) => {
-      setTimeout(() => {
-        res(filteredScans);
-      }, filteredScans.length / 5);
-    });
+    if (dateRange) {
+      filteredScans = filteredScans.filter(scan => {
+        const scanDate = new Date(scan.date);
+        return scanDate >= dateRange.startDate && scanDate <= dateRange.endDate;
+      });
+    }
+
+    if (cloudProviderId) {
+      filteredScans = filteredScans.filter(scan => scan.cloudProviderId === cloudProviderId);
+    }
+
+    return Promise.resolve(filteredScans);
   }
 }
