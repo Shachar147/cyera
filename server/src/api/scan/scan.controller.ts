@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ScanService } from './scan.service';
-import {ScanQueryParams} from "./scan.types";
+import { ScanQueryParams } from './scan.types';
 
 export class ScanController {
   static async getScans(req: Request<{}, {}, {}, ScanQueryParams>, res: Response) {
@@ -14,6 +14,20 @@ export class ScanController {
     } catch (error) {
       console.error('Error fetching scans:', error);
       return res.status(500).json({ error: 'Failed to fetch scans' });
+    }
+  }
+
+  static async getDailyScans(req: Request<{}, {}, {}, ScanQueryParams>, res: Response) {
+    try {
+      const currentYear = new Date().getFullYear();
+      const year = req.query.year ? Number(req.query.year) : currentYear;
+      const cloudProviderId = req.query.cloudProviderId;
+
+      const dailyCounts = await ScanService.getDailyScanCounts(year, cloudProviderId);
+      return res.status(200).json(dailyCounts);
+    } catch (error) {
+      console.error('Error fetching daily scan counts:', error);
+      return res.status(500).json({ error: 'Failed to fetch daily scan counts' });
     }
   }
 }

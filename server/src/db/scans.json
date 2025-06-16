@@ -1,10 +1,31 @@
 [
   {
     "id": "today123456789",
-    "date": "2025-06-15T12:35:40.668Z",
+    "date": "2025-06-16T12:35:40.668Z",
     "cloudProviderId": "98a2779a040f9",
     "scanSize": 5000,
     "scanPrivateKey": "today123456"
+  },
+  {
+    "id": "yesterday123456789",
+    "date": "2025-06-15T12:35:40.668Z",
+    "cloudProviderId": "98a2779a040f9",
+    "scanSize": 5000,
+    "scanPrivateKey": "yesterday123456"
+  },
+  {
+    "id": "tomorrow123456789",
+    "date": "2025-06-17T12:35:40.668Z",
+    "cloudProviderId": "98a2779a040f9",
+    "scanSize": 5000,
+    "scanPrivateKey": "tomorrow123456"
+  },
+  {
+    "id": "prevYear123456789",
+    "date": "2024-06-16T12:35:40.668Z",
+    "cloudProviderId": "98a2779a040f9",
+    "scanSize": 5000,
+    "scanPrivateKey": "prevYear123456"
   },
   {
     "id": "e867669d787e9",

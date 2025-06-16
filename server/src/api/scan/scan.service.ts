@@ -47,4 +47,42 @@ export class ScanService {
 
     return ScanRepository.findAll(params);
   }
+
+  static async getDailyScanCounts(year?: number, cloudProviderId?: string): Promise<Record<string, number>> {
+    const currentYear = new Date().getFullYear();
+    const targetYear = year || currentYear;
+
+    const { startDate, endDate } = this.getDateRangeForYear(targetYear);
+
+    const allScans = await ScanRepository.findAll({
+      filterCallback: (scan: Scan) => {
+        if (cloudProviderId && scan.cloudProviderId !== cloudProviderId) {
+          return false;
+        }
+        // Filter by the date range determined by getDateRangeForYear
+        return scan.date >= startDate && scan.date <= endDate;
+      }
+    });
+
+    const dailyCounts: Record<string, number> = {};
+
+    // Initialize counts for all days in the range to 0
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const dayKey = currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+      dailyCounts[dayKey] = 0;
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Populate actual scan counts
+    allScans.forEach(scan => {
+      const scanDate = new Date(scan.date);
+      const dayKey = scanDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+      if (dailyCounts[dayKey] !== undefined) {
+        dailyCounts[dayKey]++;
+      }
+    });
+
+    return dailyCounts;
+  }
 } 
