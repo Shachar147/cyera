@@ -1,5 +1,9 @@
 import { HeatmapThresholds } from '../../../server/src/api/scan/scan.types';
 
+export function getClasses(classList: string[]): string {
+  return classList.filter(Boolean).join(" ");
+}
+
 export function getHeatmapColorClass(count: number, maxDailyScans: number, heatmapThresholds: HeatmapThresholds | null): string {
   if (count === 0) return 'color1'; // Dark grey for no scans
   if (maxDailyScans === 0) return 'color1'; // All days have 0 scans

@@ -1,0 +1,16 @@
+.dayBox {
+    width: 15px;
+    height: 15px;
+    margin: 2px;
+    border-radius: 3px;
+}
+
+.heatmapContainer {
+    padding: 10px;
+    background: black;
+}
+
+.monthContainer {
+    display: flex;
+    margin-bottom: 4px;
+}

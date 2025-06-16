@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { scansApiService } from '../services/scans-api-service';
-import { HeatmapThresholds } from '../../../server/src/api/scan/scan.types';
-import { getHeatmapColorClass } from '../utils/heatmap-utils';
+import { scansApiService } from '../../services/scans-api-service';
+import { HeatmapThresholds } from '../../../../server/src/api/scan/scan.types';
+import {getClasses, getHeatmapColorClass} from '../../utils/heatmap-utils';
+import styles from './heatmap.module.css';
 
 interface HeatmapProps {
   year?: number;
@@ -78,13 +79,7 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
         daysInMonth.push(
           <div
             key={dayKey}
-            className={`day-box ${colorClass}`}
-            style={{
-              width: '15px',
-              height: '15px',
-              margin: '2px',
-              borderRadius: '3px',
-            }}
+            className={getClasses([styles.dayBox, colorClass])}
             title={`${dayKey}: ${scanCount} scans (Max: ${maxDailyScans}, % of Max: ${(scanCount / maxDailyScans * 100).toFixed(2)}%)`}
           />
         );
@@ -93,7 +88,7 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
 
       if (daysInMonth.length > 0) {
         heatmapRows.push(
-          <div key={monthIndex} style={{ display: 'flex', marginBottom: '4px' }}>
+          <div key={monthIndex} className={styles.monthContainer}>
             {daysInMonth}
           </div>
         );
@@ -101,15 +96,11 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
     });
 
     return (
-      <div style={{ padding: '10px', background: 'black', borderRadius: '8px' }}>
+      <div className={styles.heatmapContainer}>
         {heatmapRows}
       </div>
     );
   }
 
-  return (
-    <div className="heatmap-container">
-      {renderHeatmap()}
-    </div>
-  );
+  return renderHeatmap();
 }

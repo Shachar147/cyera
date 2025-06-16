@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './styles.css';
-import { Heatmap } from './components/Heatmap';
+import { Heatmap } from './components/heatmap/heatmap';
 import { YearPicker } from './components/YearPicker';
 import { CloudPrivderSelect } from './components/CloudPrivderSelect';
 import { useCloudProviders } from './hooks';
