@@ -36,3 +36,10 @@ export interface ScanQueryParams {
   year?: string;
   cids?: string[];
 }
+
+export interface HeatmapThresholds {
+  threshold1: number;
+  threshold2: number;
+  threshold3: number;
+  threshold4: number;
+}

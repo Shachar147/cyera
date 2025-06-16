@@ -1,5 +1,5 @@
 import { ScanRepository } from './scan.repository';
-import { Scan, FindAllParams, DateRange } from './scan.types';
+import { Scan, FindAllParams, DateRange, HeatmapThresholds } from './scan.types';
 
 export class ScanService {
   private static getDateRangeForYear(year: number): DateRange {
@@ -88,5 +88,14 @@ export class ScanService {
     });
 
     return dailyCounts;
+  }
+
+  static async getHeatmapSettings(): Promise<HeatmapThresholds> {
+    return {
+      threshold1: 0.25,
+      threshold2: 0.50,
+      threshold3: 0.75,
+      threshold4: 1.00,
+    };
   }
 } 

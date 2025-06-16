@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { scansApiService } from '../services/scans-api-service';
+import { HeatmapThresholds } from '../../../server/src/api/scan/scan.types';
+import { getHeatmapColorClass } from '../utils/heatmap-utils';
 
 interface HeatmapProps {
   year?: number;
@@ -8,6 +10,7 @@ interface HeatmapProps {
 
 export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
   const [dailyScanCounts, setDailyScanCounts] = useState<Record<string, number>>({});
+  const [heatmapThresholds, setHeatmapThresholds] = useState<HeatmapThresholds | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,11 +18,13 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
     setLoading(true);
     setError(null);
     try {
-      const data = await scansApiService.getDailyScanCounts(year, cloudProviderIds);
-      setDailyScanCounts(data);
+      const countsData = await scansApiService.getDailyScanCounts(year, cloudProviderIds);
+      const thresholdsData = await scansApiService.getHeatmapSettings();
+      setDailyScanCounts(countsData);
+      setHeatmapThresholds(thresholdsData);
     } catch (err) {
-      console.error("Error fetching daily scan counts:", err);
-      setError("Failed to load scan data.");
+      console.error("Error fetching daily scan counts or settings:", err);
+      setError("Failed to load scan data or settings.");
     } finally {
       setLoading(false);
     }
@@ -53,13 +58,9 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
 
     const endDate = getEndDate(targetYear);
 
-    const getHeatmapColorClass = (count: number): string => {
-      if (count === 0) return 'color1'; // Grey for no scans
-      if (count <= 5) return 'color2'; // Darkest purple
-      if (count <= 10) return 'color3'; // Medium dark purple
-      if (count <= 20) return 'color4'; // Medium light purple
-      return 'color5'; // Lightest purple for many scans
-    };
+    // Calculate max daily scans from visible data
+    const allScanCounts = Object.values(dailyScanCounts);
+    const maxDailyScans = allScanCounts.length > 0 ? Math.max(...allScanCounts) : 0;
 
     const months = Array.from({ length: 12 }, (_, i) => i); // 0-11 for months
     const heatmapRows: JSX.Element[] = [];
@@ -72,7 +73,7 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
       while (dayIterator.getMonth() === monthIndex && dayIterator <= endDate) {
         const dayKey = dayIterator.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
         const scanCount = dailyScanCounts[dayKey] || 0;
-        const colorClass = getHeatmapColorClass(scanCount);
+        const colorClass = getHeatmapColorClass(scanCount, maxDailyScans, heatmapThresholds);
 
         daysInMonth.push(
           <div
@@ -84,7 +85,7 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
               margin: '2px',
               borderRadius: '3px',
             }}
-            title={`${dayKey}: ${scanCount} scans`}
+            title={`${dayKey}: ${scanCount} scans (Max: ${maxDailyScans}, % of Max: ${(scanCount / maxDailyScans * 100).toFixed(2)}%)`}
           />
         );
         dayIterator.setDate(dayIterator.getDate() + 1);
@@ -111,4 +112,4 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
       {renderHeatmap()}
     </div>
   );
-};
+}

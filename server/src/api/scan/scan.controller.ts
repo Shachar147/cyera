@@ -38,4 +38,14 @@ export class ScanController {
       return res.status(500).json({ error: 'Failed to fetch daily scan counts' });
     }
   }
+
+  static async getSettings(req: Request, res: Response) {
+    try {
+      const settings = await ScanService.getHeatmapSettings();
+      return res.status(200).json(settings);
+    } catch (error) {
+      console.error('Error fetching heatmap settings:', error);
+      return res.status(500).json({ error: 'Failed to fetch heatmap settings' });
+    }
+  }
 }
