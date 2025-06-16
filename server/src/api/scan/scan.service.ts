@@ -1,7 +1,10 @@
 import { ScanRepository } from './scan.repository';
 import { Scan, FindAllParams, DateRange, HeatmapThresholds } from './scan.types';
+import { ScanCache } from './scan.cache';
 
 export class ScanService {
+  private static cache = ScanCache.getInstance();
+
   private static getDateRangeForYear(year: number): DateRange {
     const currentYear = new Date().getFullYear();
     const startDate = new Date(year, 0, 1); // January 1st
@@ -21,6 +24,17 @@ export class ScanService {
   }
 
   static async getScans(year?: number, cloudProviderIds?: string[]): Promise<Scan[]> {
+    const currentYear = new Date().getFullYear();
+    
+    // If querying past years, try to get from cache first
+    if (year && year < currentYear) {
+      const cachedData = this.cache.get<Scan[]>('getScans', { year, cloudProviderIds });
+      if (cachedData) {
+        console.log(`[Cache Hit] Returning cached scans data for year ${year}`);
+        return cachedData;
+      }
+    }
+
     const params: FindAllParams = {
       filterCallback: (scan: Scan) => {
         // If no filters are provided, return all scans
@@ -47,12 +61,29 @@ export class ScanService {
       }
     };
 
-    return ScanRepository.findAll(params);
+    const result = await ScanRepository.findAll(params);
+    
+    // Cache the result only if it's for a past year
+    if (year && year < currentYear) {
+      console.log(`[Cache Miss] Caching scans data for year ${year}`);
+      this.cache.set('getScans', { year, cloudProviderIds }, result);
+    }
+
+    return result;
   }
 
   static async getDailyScanCounts(year?: number, cloudProviderIds?: string[]): Promise<Record<string, number>> {
     const currentYear = new Date().getFullYear();
     const targetYear = year || currentYear;
+
+    // If querying past years, try to get from cache first
+    if (targetYear < currentYear) {
+      const cachedData = this.cache.get<Record<string, number>>('getDailyScanCounts', { year: targetYear, cloudProviderIds });
+      if (cachedData) {
+        console.log(`[Cache Hit] Returning cached daily scan counts for year ${targetYear}`);
+        return cachedData;
+      }
+    }
 
     const { startDate, endDate } = this.getDateRangeForYear(targetYear);
 
@@ -86,6 +117,12 @@ export class ScanService {
         dailyCounts[dayKey]++;
       }
     });
+
+    // Cache the result only if it's for a past year
+    if (targetYear < currentYear) {
+      console.log(`[Cache Miss] Caching daily scan counts for year ${targetYear}`);
+      this.cache.set('getDailyScanCounts', { year: targetYear, cloudProviderIds }, dailyCounts);
+    }
 
     return dailyCounts;
   }
