@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import scanRouter from './scan';
-import cloudProviderRouter from './cloud-provider';
+import scanRouter from './scan/scan.routes';
+import cloudProviderRouter from './cloud-provider/cloud-provider.routes';
 
 const router = Router();
 

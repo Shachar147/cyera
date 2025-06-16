@@ -3,7 +3,7 @@
 */
 
 import scansJson from '../../db/scans.json';
-import { FindAllParams, Scan } from './types';
+import { FindAllParams, Scan } from './scan.types';
 
 const scansData: Scan[] = scansJson.map(
   ({
@@ -39,6 +39,6 @@ export class ScanRepository {
       setTimeout(() => {
         res(filteredScans);
       }, filteredScans.length / 5);
-    });
-  }
+      });
+    }
 }
