@@ -19,8 +19,12 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
     setLoading(true);
     setError(null);
     try {
-      const countsData = await scansApiService.getDailyScanCounts(year, cloudProviderIds);
-      const thresholdsData = await scansApiService.getHeatmapSettings();
+      let countsData: Record<string, number>;
+      let thresholdsData: HeatmapThresholds;
+      [countsData, thresholdsData] = await Promise.all([
+        scansApiService.getDailyScanCounts(year, cloudProviderIds),
+        scansApiService.getHeatmapSettings()
+      ]);
       setDailyScanCounts(countsData);
       setHeatmapThresholds(thresholdsData);
     } catch (err) {
@@ -41,23 +45,23 @@ export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
     return <div>Error: {error}</div>;
   }
 
+  function getEndDate(currentYear: number, year: number) {
+    if (year === currentYear) {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      yesterday.setHours(23, 59, 59, 999);
+      return yesterday;
+    } else {
+      return new Date(year, 11, 31, 23, 59, 59, 999); // December 31st
+    }
+  }
+
   function renderHeatmap() {
     const currentYear = new Date().getFullYear();
     const targetYear = year || currentYear;
 
-    const getEndDate = (year: number) => {
-      if (year === currentYear) {
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
-        yesterday.setHours(23, 59, 59, 999);
-        return yesterday;
-      } else {
-        return new Date(year, 11, 31, 23, 59, 59, 999); // December 31st
-      }
-    };
-
-    const endDate = getEndDate(targetYear);
+    const endDate = getEndDate(currentYear, targetYear);
 
     // Calculate max daily scans from visible data
     const allScanCounts = Object.values(dailyScanCounts);
