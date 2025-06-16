@@ -1,5 +1,114 @@
-interface HeatmapProps {}
+import React, { useEffect, useState } from 'react';
+import { scansApiService } from '../services/scans-api-service';
 
-export const Heatmap = ({}: HeatmapProps) => {
-  return <div>implement heatmap here</div>;
+interface HeatmapProps {
+  year?: number;
+  cloudProviderId?: string;
+}
+
+export function Heatmap({ year, cloudProviderId }: HeatmapProps) {
+  const [dailyScanCounts, setDailyScanCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function fetchDailyScans(){
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await scansApiService.getDailyScanCounts(year, cloudProviderId);
+      setDailyScanCounts(data);
+    } catch (err) {
+      console.error("Error fetching daily scan counts:", err);
+      setError("Failed to load scan data.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => void fetchDailyScans(), [year, cloudProviderId]);
+
+  if (loading) {
+    return <div>Loading heatmap...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  function renderHeatmap() {
+    const currentYear = new Date().getFullYear();
+    const targetYear = year || currentYear;
+
+    const getEndDate = (year: number) => {
+      if (year === currentYear) {
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        yesterday.setHours(23, 59, 59, 999);
+        return yesterday;
+      } else {
+        return new Date(year, 11, 31, 23, 59, 59, 999); // December 31st
+      }
+    };
+
+    const endDate = getEndDate(targetYear);
+
+    const getHeatmapColorClass = (count: number): string => {
+      if (count === 0) return 'color1'; // Grey for no scans
+      if (count <= 5) return 'color2'; // Darkest purple
+      if (count <= 10) return 'color3'; // Medium dark purple
+      if (count <= 20) return 'color4'; // Medium light purple
+      return 'color5'; // Lightest purple for many scans
+    };
+
+    const months = Array.from({ length: 12 }, (_, i) => i); // 0-11 for months
+    const heatmapRows: JSX.Element[] = [];
+
+    months.forEach(monthIndex => {
+      const daysInMonth: JSX.Element[] = [];
+      const firstDayOfMonth = new Date(targetYear, monthIndex, 1);
+      let dayIterator = new Date(firstDayOfMonth);
+
+      while (dayIterator.getMonth() === monthIndex && dayIterator <= endDate) {
+        const dayKey = dayIterator.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+        const scanCount = dailyScanCounts[dayKey] || 0;
+        const colorClass = getHeatmapColorClass(scanCount);
+
+        daysInMonth.push(
+          <div
+            key={dayKey}
+            className={`day-box ${colorClass}`}
+            style={{
+              width: '15px',
+              height: '15px',
+              margin: '2px',
+              borderRadius: '3px',
+            }}
+            title={`${dayKey}: ${scanCount} scans`}
+          />
+        );
+        dayIterator.setDate(dayIterator.getDate() + 1);
+      }
+
+      if (daysInMonth.length > 0) {
+        heatmapRows.push(
+          <div key={monthIndex} style={{ display: 'flex', marginBottom: '4px' }}>
+            {daysInMonth}
+          </div>
+        );
+      }
+    });
+
+    return (
+      <div style={{ padding: '10px', background: 'black', borderRadius: '8px' }}>
+        {heatmapRows}
+      </div>
+    );
+  }
+
+  return (
+    <div className="heatmap-container">
+      {renderHeatmap()}
+    </div>
+  );
 };
