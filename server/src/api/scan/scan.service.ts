@@ -1,8 +1,8 @@
 import { ScanRepository } from './scan.repository';
-import { Scan, FindAllParams } from './scan.types';
+import { Scan, FindAllParams, DateRange } from './scan.types';
 
 export class ScanService {
-  private static getDateRangeForYear(year: number): { startDate: Date; endDate: Date } {
+  private static getDateRangeForYear(year: number): DateRange {
     const currentYear = new Date().getFullYear();
     const startDate = new Date(year, 0, 1); // January 1st
 
@@ -20,11 +20,11 @@ export class ScanService {
     return { startDate, endDate };
   }
 
-  static async getScans(year?: number, cloudProviderId?: string): Promise<Scan[]> {
+  static async getScans(year?: number, cloudProviderIds?: string[]): Promise<Scan[]> {
     const params: FindAllParams = {
       filterCallback: (scan: Scan) => {
         // If no filters are provided, return all scans
-        if (!year && !cloudProviderId) {
+        if (!year && !cloudProviderIds?.length) {
           return true;
         }
 
@@ -36,9 +36,11 @@ export class ScanService {
           }
         }
 
-        // Apply cloudProviderId filter if provided
-        if (cloudProviderId && scan.cloudProviderId !== cloudProviderId) {
-          return false;
+        // Apply cloudProviderIds filter if provided
+        if (cloudProviderIds && cloudProviderIds.length > 0) {
+          if (!cloudProviderIds.includes(scan.cloudProviderId)) {
+            return false;
+          }
         }
 
         return true;
@@ -48,7 +50,7 @@ export class ScanService {
     return ScanRepository.findAll(params);
   }
 
-  static async getDailyScanCounts(year?: number, cloudProviderId?: string): Promise<Record<string, number>> {
+  static async getDailyScanCounts(year?: number, cloudProviderIds?: string[]): Promise<Record<string, number>> {
     const currentYear = new Date().getFullYear();
     const targetYear = year || currentYear;
 
@@ -56,8 +58,10 @@ export class ScanService {
 
     const allScans = await ScanRepository.findAll({
       filterCallback: (scan: Scan) => {
-        if (cloudProviderId && scan.cloudProviderId !== cloudProviderId) {
-          return false;
+        if (cloudProviderIds && cloudProviderIds.length > 0) {
+          if (!cloudProviderIds.includes(scan.cloudProviderId)) {
+            return false;
+          }
         }
         // Filter by the date range determined by getDateRangeForYear
         return scan.date >= startDate && scan.date <= endDate;

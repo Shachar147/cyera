@@ -3,10 +3,10 @@ import { scansApiService } from '../services/scans-api-service';
 
 interface HeatmapProps {
   year?: number;
-  cloudProviderId?: string;
+  cloudProviderIds?: string[];
 }
 
-export function Heatmap({ year, cloudProviderId }: HeatmapProps) {
+export function Heatmap({ year, cloudProviderIds }: HeatmapProps) {
   const [dailyScanCounts, setDailyScanCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +15,7 @@ export function Heatmap({ year, cloudProviderId }: HeatmapProps) {
     setLoading(true);
     setError(null);
     try {
-      const data = await scansApiService.getDailyScanCounts(year, cloudProviderId);
+      const data = await scansApiService.getDailyScanCounts(year, cloudProviderIds);
       setDailyScanCounts(data);
     } catch (err) {
       console.error("Error fetching daily scan counts:", err);
@@ -25,7 +25,7 @@ export function Heatmap({ year, cloudProviderId }: HeatmapProps) {
     }
   }
 
-  useEffect(() => void fetchDailyScans(), [year, cloudProviderId]);
+  useEffect(() => void fetchDailyScans(), [year, cloudProviderIds]);
 
   if (loading) {
     return <div>Loading heatmap...</div>;

@@ -8,7 +8,7 @@ import { useCloudProviders } from './hooks';
 export default function App() {
   const cloudProviders = useCloudProviders();
   const [selectedYear, setSelectedYear] = useState<number | undefined>(new Date().getFullYear());
-  const [selectedCloudProviderId, setSelectedCloudProviderId] = useState<string | undefined>(undefined);
+  const [selectedCloudProviderIds, setSelectedCloudProviderIds] = useState<string[]>([]);
 
   return (
     <div className="app">
@@ -19,14 +19,14 @@ export default function App() {
           onChange={setSelectedYear}
         />
         <CloudPrivderSelect
-          options={cloudProviders?.map(cp => ({ displayName: cp, value: cp })) || []}
-          onChange={(values: string[]) => setSelectedCloudProviderId(values[0])}
-          selectedOptions={selectedCloudProviderId ? [selectedCloudProviderId] : []}
+          options={cloudProviders?.map(cp => ({ displayName: cp.name, value: cp.id })) || []}
+          onChange={setSelectedCloudProviderIds}
+          selectedOptions={selectedCloudProviderIds}
         />
       </div>
-      <Heatmap year={selectedYear} cloudProviderId={selectedCloudProviderId} />
+      <Heatmap year={selectedYear} cloudProviderIds={selectedCloudProviderIds} />
       {/* e2e example: */}
-      <div>Cloud Providers: {cloudProviders?.join(', ')}</div>
+      <div>Cloud Providers: {cloudProviders?.map(cp => cp.name).join(', ')}</div>
     </div>
   );
 }
